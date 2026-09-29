@@ -34,12 +34,7 @@ paths:
   /api/users/{user-id}:
     get:
       parameters:
-        - name: user-id
-          in: path
-          required: true
-          schema:
-            type: integer
-            example: 3232
+        - $ref: '#/components/parameters/UserIdPath'
       responses:
         200:
           description: This is the user with the specified ID
@@ -49,6 +44,15 @@ paths:
                 $ref: '#/components/schemas/User'
 
 components:
+  parameters:
+    UserIdPath:
+      name: user-id
+      in: path
+      description: User ID path parameter
+      required: true
+      schema:
+        type: integer
+        example: 3232
   schemas:
     User:
       type: object
