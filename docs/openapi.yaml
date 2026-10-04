@@ -23,13 +23,18 @@ paths:
     post:
       description: Add a new user to the app
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
       responses:
-        200:
+        201:
           description: This is the user that was added to the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 
   /api/users/{user-id}:
     get:
@@ -42,6 +47,159 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        200:
+          description: This is the user that was deleted from the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    patch:
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: This is the user that was updated in the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/users/{user-id}/activities:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        200:
+          description: This is a list of the activities for the user with the specified ID
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+    delete:
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        200:
+          description: This is a list of the activities for the user with the specified ID that were deleted
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+
+  /api/users/email/{email}:
+    get:
+      parameters:
+        - name: email
+          in: path
+          description: User email path parameter
+          required: true
+          schema:
+            type: string
+            example: example@gmail.com
+      responses:
+        200:
+          description: This is the user with the specified email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/activities:
+    get:
+      responses:
+        200:
+          description: This is a list of all activities in the app
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+    post:
+      description: Add a new activity to the app
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+      responses:
+        201:
+          description: This is the activity that was added to the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+
+  /api/activities/{activity-id}:
+    get:
+      parameters:
+        - name: activity-id
+          in: path
+          description: Activity ID path parameter
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: This is the activity with the specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+    delete:
+      parameters:
+        - name: activity-id
+          in: path
+          description: Activity ID path parameter
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: This is the activity that was deleted from the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+    patch:
+      parameters:
+        - name: activity-id
+          in: path
+          description: Activity ID path parameter
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+      responses:
+        200:
+          description: This is the activity that was updated in the app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
 
 components:
   parameters:
@@ -66,3 +224,15 @@ components:
         email:
           type: string
           example: joe@soap.com
+    Activity:
+      type: object
+      properties:
+        activity_id:
+          type: integer
+          example: 1
+        activity_name:
+          type: string
+          example: Running
+        duration_minutes:
+          type: integer
+          example: 30
