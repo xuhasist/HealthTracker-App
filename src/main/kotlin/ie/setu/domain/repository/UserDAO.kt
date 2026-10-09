@@ -18,7 +18,25 @@ class UserDAO {
         return users.find { it.id == id }
     }
 
+    fun findUserByEmail(email: String): User? {
+        return users.find { it.email == email }
+    }
+
     fun saveUser(user: User) {
         users.add(user)
+    }
+
+    fun deleteUserById(id: Int) {
+        val user = findUserById(id)
+        if (user != null) {
+            users.remove(user)
+        }
+    }
+
+    fun updateUser(id: Int, updatedUser: User) {
+        val userIndex = users.indexOfFirst { it.id == id }
+        if (userIndex != -1) {
+            users[userIndex] = updatedUser.copy(id = id)    // Keep the same id for the updated user
+        }
     }
 }

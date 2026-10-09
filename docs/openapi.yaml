@@ -51,12 +51,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        200:
+        204:
           description: This is the user that was deleted from the app
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/User'
     patch:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
