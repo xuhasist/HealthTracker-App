@@ -15,10 +15,18 @@ class ServerConfig {
                 ctx.json("404 - Not Found")
             }
             registerRoutes(config)
-        }.start(7001)
+        }.start(getRemoteAssignedPort())
 
         return app
     }
+
+    private fun getRemoteAssignedPort(): Int {
+        val remotePort = System.getenv("PORT")
+        return if (remotePort != null) {
+            Integer.parseInt(remotePort)
+        } else 8080
+    }
+
 
     private fun registerRoutes(config: JavalinConfig) {
         config.routes.get("/api/users", HealthTrackerController::getAllUsers)
