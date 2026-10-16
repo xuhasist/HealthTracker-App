@@ -13,9 +13,9 @@ class DbConfig {
 
         val PGHOST = System.getenv("POSTGRESQL_HOST") ?: "localhost"
         val PGPORT = System.getenv("POSTGRESQL_SERVICE_PORT") ?: "5432"
-        val PGDATABASE = System.getenv("POSTGRESQL_DATABASE") ?: "defaultdb"
-        val PGUSER = System.getenv("POSTGRESQL_USER") ?: "defaultuser"
-        val PGPASSWORD = System.getenv("POSTGRESQL_PASSWORD") ?: "defaultpass"
+        val PGDATABASE = System.getenv("POSTGRESQL_DATABASE") ?: "healthtrackerdb"
+        val PGUSER = System.getenv("POSTGRESQL_USER") ?: "postgres"
+        val PGPASSWORD = System.getenv("POSTGRESQL_PASSWORD") ?: "postgres"
 
         // JDBC connection string format
         val dbUrl = "jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE"

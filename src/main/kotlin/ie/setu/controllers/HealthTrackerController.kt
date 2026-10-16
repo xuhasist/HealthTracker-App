@@ -18,6 +18,8 @@ object HealthTrackerController {
         val user = userDAO.findUserById(ctx.pathParam("user-id").toInt())
         if (user != null) {
             ctx.json(user)
+        } else {
+            ctx.status(404).json("User not found")
         }
     }
 
@@ -25,14 +27,16 @@ object HealthTrackerController {
         val user = userDAO.findUserByEmail(ctx.pathParam("email"))
         if (user != null) {
             ctx.json(user)
+        } else {
+            ctx.status(404).json("User not found")
         }
     }
 
     fun addUser(ctx: Context) {
         val mapper = jacksonObjectMapper()
         val user = mapper.readValue<User>(ctx.body())
-        userDAO.saveUser(user)
-        ctx.status(201).json(user)
+        val savedUser = userDAO.saveUser(user)
+        ctx.status(201).json(savedUser)
     }
 
     fun deleteUserById(ctx: Context) {
