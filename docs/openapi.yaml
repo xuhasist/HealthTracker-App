@@ -91,14 +91,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        200:
-          description: This is a list of the activities for the user with the specified ID that were deleted
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Activity'
+        204:
+          description: User activities deleted successfully
 
   /api/users/email/{email}:
     get:
@@ -172,12 +166,8 @@ paths:
             type: integer
             example: 1
       responses:
-        200:
-          description: This is the activity that was deleted from the app
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Activity'
+        204:
+          description: Activity deleted successfully
     patch:
       parameters:
         - name: activity-id
@@ -224,15 +214,35 @@ components:
         email:
           type: string
           example: joe@soap.com
+
     Activity:
       type: object
+      required:
+        - id
+        - description
+        - duration
+        - calories
+        - started
+        - userId
       properties:
-        activity_id:
+        id:
           type: integer
           example: 1
-        activity_name:
+        description:
           type: string
+          maxLength: 100
           example: Running
-        duration_minutes:
+        duration:
           type: integer
+          description: Duration in minutes
           example: 30
+        calories:
+          type: integer
+          example: 250
+        started:
+          type: string
+          description: ISO 8601 date-time
+          example: "2026-10-17T08:00:00Z"
+        userId:
+          type: integer
+          example: 1
