@@ -7,7 +7,7 @@ import ie.setu.domain.repository.UserDAO
 import io.javalin.http.Context
 
 // object means only one instance of this class will be created and it will be a singleton
-object HealthTrackerController {
+object UserController {
     private val userDAO = UserDAO()
 
     fun getAllUsers(ctx: Context) {

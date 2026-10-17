@@ -1,6 +1,7 @@
 package ie.setu.config
 
-import ie.setu.controllers.HealthTrackerController
+import ie.setu.controllers.ActivityController
+import ie.setu.controllers.UserController
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 
@@ -29,11 +30,19 @@ class ServerConfig {
 
 
     private fun registerRoutes(config: JavalinConfig) {
-        config.routes.get("/api/users", HealthTrackerController::getAllUsers)
-        config.routes.get("/api/users/{user-id}", HealthTrackerController::getUserById)
-        config.routes.get("/api/users/email/{email}", HealthTrackerController::getUserByEmail)
-        config.routes.post("/api/users", HealthTrackerController::addUser)
-        config.routes.delete("/api/users/{user-id}", HealthTrackerController::deleteUserById)
-        config.routes.patch("/api/users/{user-id}", HealthTrackerController::updateUser)
+        config.routes.get("/api/users", UserController::getAllUsers)
+        config.routes.get("/api/users/{user-id}", UserController::getUserById)
+        config.routes.get("/api/users/email/{email}", UserController::getUserByEmail)
+        config.routes.post("/api/users", UserController::addUser)
+        config.routes.delete("/api/users/{user-id}", UserController::deleteUserById)
+        config.routes.patch("/api/users/{user-id}", UserController::updateUser)
+
+        config.routes.get("/api/activities", ActivityController::getAllActivities)
+        config.routes.get("/api/activities/{activity-id}", ActivityController::getActivityById)
+        config.routes.post("/api/activities", ActivityController::addActivity)
+        config.routes.patch("/api/activities/{activity-id}", ActivityController::updateActivity)
+        config.routes.delete("/api/activities/{activity-id}", ActivityController::deleteActivityById)
+        config.routes.get("/api/users/{user-id}/activities", ActivityController::getActivitiesByUserId)
+        config.routes.delete("/api/users/{user-id}/activities", ActivityController::deleteActivitiesByUserId)
     }
 }
