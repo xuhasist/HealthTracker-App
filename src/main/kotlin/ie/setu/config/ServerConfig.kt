@@ -31,7 +31,9 @@ class ServerConfig {
 
 
     private fun registerRoutes(config: JavalinConfig) {
+        // All routes under /api/* require authentication
         config.routes.before("/api/*", AuthMiddleware::authenticate)
+
         config.routes.post("/api/auth/register", AuthController::register)
         config.routes.post("/api/auth/login", AuthController::login)
         config.routes.post("/api/auth/logout", AuthController::logout)
