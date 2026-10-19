@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.update
 
@@ -52,19 +53,23 @@ class ActivityDAO {
 
     fun updateActivity(activity: Activity): Activity? {
         return transaction {
-            val updatedRow = Activities.update({ Activities.id eq activity.id }) {
-                it[userId] = activity.userId
-                it[description] = activity.description
-                it[duration] = activity.duration
-                it[calories] = activity.calories
-                it[started] = activity.started
-            }
+            val updatedRow =
+                Activities.update({ (Activities.id eq activity.id) and (Activities.userId eq activity.userId) }) {
+                    it[userId] = activity.userId
+                    it[description] = activity.description
+                    it[duration] = activity.duration
+                    it[calories] = activity.calories
+                    it[started] = activity.started
+                }
             if (updatedRow > 0) activity else null
         }
     }
 
-    fun deleteActivityById(id: Int) {
-        transaction { Activities.deleteWhere { Activities.id eq id } }
+    fun deleteActivityById(id: Int, ownerId: Int): Int {
+        // Check ownership in SQL, so another user's record cannot be deleted.
+        return transaction {
+            Activities.deleteWhere { (Activities.id eq id) and (Activities.userId eq ownerId) }
+        }
     }
 
     fun deleteActivitiesByUserId(userId: Int) {

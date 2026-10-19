@@ -86,6 +86,12 @@
             <artifactId>postgresql</artifactId>
             <version>${postresql-version}</version>
         </dependency>
+        <!-- BCrypt password hashing: an additional application capability -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
         <!-- kotlin logging -->
         <dependency>
             <groupId>io.github.oshai</groupId>

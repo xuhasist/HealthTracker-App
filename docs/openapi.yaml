@@ -7,93 +7,167 @@ info:
     name: Yufan Liu
     email: 20120213@setu.ie
 
-paths:
-  /api/users:
-    get:
-      responses:
-        200:
-          description: This is a list of the users in the app
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+# All endpoints require a bearer access token unless an operation overrides security with [].
+security:
+  - BearerAuth: []
 
+paths:
+  /api/auth/register:
     post:
-      description: Add a new user to the app
+      summary: Register a new user account
+      description: Public endpoint. Passwords are stored as BCrypt hashes, never returned to clients.
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
-        201:
-          description: This is the user that was added to the app
+        '201':
+          description: Account created; returns the user without a password hash.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid name, email, or password (password must contain 12–72 UTF-8 bytes).
+        '409':
+          description: Email address already registered.
+
+  /api/auth/login:
+    post:
+      summary: Log in with email and password
+      description: Public endpoint. Returns a new opaque bearer token valid for 24 hours.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful; store the returned token securely.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid email or password.
+
+  /api/auth/logout:
+    post:
+      summary: Log out the current session
+      description: Revokes the bearer token used in this request; other sessions remain valid.
+      responses:
+        '204':
+          description: Session revoked; no response body.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/users/me:
+    get:
+      summary: Get the authenticated user's profile
+      responses:
+        '200':
+          description: The currently authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The authenticated user no longer exists.
 
   /api/users/{user-id}:
     get:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        200:
-          description: This is the user with the specified ID
+        '200':
+          description: User profile, only if the requested ID equals the authenticated user ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Access denied because the user ID differs from the authenticated user.
+        '404':
+          description: User does not exist.
     delete:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        204:
-          description: This is the user that was deleted from the app
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/User'
+        '204':
+          description: User deleted successfully; no response body.
+        #          content:
+        #            application/json:
+        #              schema:
+        #                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Access denied because the user ID differs from the authenticated user.
     patch:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
+      description: >
+        Update your own name/email. The current Kotlin User input model requires id,
+        name, and email in the JSON body, although the URL ID is authoritative.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserUpdateRequest'
       responses:
-        200:
+        '200':
           description: This is the user that was updated in the app
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Access denied because the user ID differs from the authenticated user.
+        '404':
+          description: User does not exist.
+        '400':
+          description: Invalid profile name or email.
+        '409':
+          description: Email address is already registered.
   /api/users/{user-id}/activities:
     get:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        200:
-          description: This is a list of the activities for the user with the specified ID
+        '200':
+          description: Activities belonging to the specified user (who must be the authenticated user)
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Activity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Access denied because the user ID differs from the authenticated user.
     delete:
       parameters:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
-        204:
+        '204':
           description: User activities deleted successfully
-
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Access denied because the user ID differs from the authenticated user.
   /api/users/email/{email}:
     get:
       parameters:
@@ -105,26 +179,34 @@ paths:
             type: string
             example: example@gmail.com
       responses:
-        200:
-          description: This is the user with the specified email
+        '200':
+          description: User profile, only if the email belongs to the authenticated user
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Email is unknown or belongs to another user.
   /api/activities:
     get:
       responses:
-        200:
-          description: This is a list of all activities in the app
+        '200':
+          description: Activities belonging to the authenticated user only
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Activity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
     post:
-      description: Add a new activity to the app
+      description: >
+        Add an activity to the authenticated account. The request userId is ignored and
+        replaced with the authenticated user ID. The current Kotlin Activity request
+        model still requires id and userId in JSON; consider a separate input DTO later.
       requestBody:
         required: true
         content:
@@ -132,13 +214,14 @@ paths:
             schema:
               $ref: '#/components/schemas/Activity'
       responses:
-        201:
+        '201':
           description: This is the activity that was added to the app
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Activity'
-
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/activities/{activity-id}:
     get:
       parameters:
@@ -150,12 +233,16 @@ paths:
             type: integer
             example: 1
       responses:
-        200:
+        '200':
           description: This is the activity with the specified ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Activity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Activity not found or does not belong to the authenticated user.
     delete:
       parameters:
         - name: activity-id
@@ -166,8 +253,12 @@ paths:
             type: integer
             example: 1
       responses:
-        204:
+        '204':
           description: Activity deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Activity not found or does not belong to the authenticated user.
     patch:
       parameters:
         - name: activity-id
@@ -184,14 +275,25 @@ paths:
             schema:
               $ref: '#/components/schemas/Activity'
       responses:
-        200:
+        '200':
           description: This is the activity that was updated in the app
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Activity'
-
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Activity not found or does not belong to the authenticated user.
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Opaque session token
+  responses:
+    Unauthorized:
+      description: Bearer token is missing, invalid, expired, or revoked.
   parameters:
     UserIdPath:
       name: user-id
@@ -202,6 +304,73 @@ components:
         type: integer
         example: 3232
   schemas:
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          example: Jane Example
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: jane@example.com
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          description: Must be between 12 and 72 UTF-8 bytes (byte count, not character count).
+          example: ExamplePassword123!
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          example: ExamplePassword123!
+
+    UserUpdateRequest:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          type: integer
+          description: Required by the current User DTO; the ID in the URL determines which user is updated.
+          example: 1
+        name:
+          type: string
+          example: Jane Example
+        email:
+          type: string
+          format: email
+          example: jane@example.com
+
+    AuthResponse:
+      type: object
+      required: [token, tokenType, expiresAt, user]
+      properties:
+        token:
+          type: string
+          description: Opaque bearer token, shown once at login.
+        tokenType:
+          type: string
+          example: Bearer
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2026-10-18T19:00:00Z'
+        user:
+          $ref: '#/components/schemas/User'
+
     User:
       type: object
       properties:
