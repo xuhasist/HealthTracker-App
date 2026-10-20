@@ -2,14 +2,15 @@ package ie.setu.domain.db
 
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.jodatime.datetime
 
 object Activities : Table("activities") {
     val id = integer("id").autoIncrement()
-    val userId = integer("user_id").references(Users.id, onDelete = ReferenceOption.CASCADE)
     val description = varchar("description", 100)
-    val duration = integer("duration")
+    val duration = double("duration")
     val calories = integer("calories")
-    val started = varchar("started", 50)
+    val started = datetime("started")
+    val userId = integer("user_id").references(Users.id, onDelete = ReferenceOption.CASCADE)
 
     override val primaryKey = PrimaryKey(id, name = "PK_Activity_ID")
 }

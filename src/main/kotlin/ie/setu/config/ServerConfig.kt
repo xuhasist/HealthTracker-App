@@ -2,16 +2,17 @@ package ie.setu.config
 
 import ie.setu.controllers.ActivityController
 import ie.setu.controllers.AuthController
-import ie.setu.security.AuthMiddleware
 import ie.setu.controllers.UserController
+import ie.setu.security.AuthMiddleware
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
 
 class ServerConfig {
     fun startJavalinService(): Javalin {
         val app = Javalin.create { config ->
-            // Javalin handles HTTP errors (401/403/404) correctly by default.
-            // The old generic Exception handler swallowed their status codes.
+            config.routes.exception(Exception::class.java) { e, ctx ->
+                e.printStackTrace()
+            }
 
             config.routes.error(404) { ctx ->
                 ctx.json("404 - Not Found")
