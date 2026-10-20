@@ -46,6 +46,35 @@ class UserDAO {
         //return users.find { it.email == email }
     }
 
+    // Authentication uses email to find the user and the saved password hash.
+    // A normal User response must not include passwordHash.
+    fun findCredentialsByEmail(email: String): Pair<User, String?>? {
+        return transaction {
+            Users.selectAll().where { Users.email eq email }
+                .firstOrNull()
+                ?.let { mapToUser(it) to it[Users.passwordHash] }
+        }
+    }
+
+    // Unlike the old lab saveUser(), registration must save a password hash.
+    fun createUser(name: String, email: String, passwordHash: String): User {
+        return transaction {
+            val id = Users.insert {
+                it[Users.name] = name
+                it[Users.email] = email
+                it[Users.passwordHash] = passwordHash
+            }[Users.id]
+            User(id = id, name = name, email = email)
+        }
+    }
+
+    // Used by AuthService if we later add an authenticated profile-edit endpoint.
+    fun updateOwnProfile(id: Int, name: String, email: String): User? {
+        val user = findUserById(id) ?: return null
+        updateUser(id, user.copy(name = name, email = email))
+        return findUserById(id)
+    }
+
     fun saveUser(user: User): User {
         return transaction {
             val insertUserId = Users.insert {
