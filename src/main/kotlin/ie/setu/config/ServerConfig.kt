@@ -1,21 +1,26 @@
 package ie.setu.config
 
 import ie.setu.controllers.HealthTrackerController
+import ie.setu.utils.jsonObjectMapper
 import io.javalin.Javalin
 import io.javalin.config.JavalinConfig
+import io.javalin.json.JavalinJackson
 
 class ServerConfig {
     fun startJavalinService(): Javalin {
         val app = Javalin.create { config ->
+            config.jsonMapper(
+                JavalinJackson(jsonObjectMapper())
+            )
             config.routes.exception(Exception::class.java) { e, ctx ->
                 e.printStackTrace()
             }
-
             config.routes.error(404) { ctx ->
                 ctx.json("404 - Not Found")
             }
             registerRoutes(config)
         }.start(getRemoteAssignedPort())
+
 
         return app
     }
@@ -35,5 +40,10 @@ class ServerConfig {
         config.routes.post("/api/users", HealthTrackerController::addUser)
         config.routes.delete("/api/users/{user-id}", HealthTrackerController::deleteUserById)
         config.routes.patch("/api/users/{user-id}", HealthTrackerController::updateUser)
+
+        config.routes.get("/api/activities", HealthTrackerController::getAllActivities)
+        config.routes.post("/api/activities", HealthTrackerController::addActivity)
+        config.routes.get("/api/users/{user-id}/activities", HealthTrackerController::getActivitiesByUserId)
+
     }
 }
